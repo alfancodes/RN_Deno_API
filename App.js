@@ -1,113 +1,75 @@
-/**
- * Sample React Native App
- * https://github.com/facebook/react-native
- *
- * @format
- * @flow strict-local
- */
-
-import React from 'react';
+import React, {useEffect, useState} from 'react';
 import {
   SafeAreaView,
   StyleSheet,
-  ScrollView,
-  View,
   Text,
   StatusBar,
+  TouchableOpacity,
+  ActivityIndicator,
 } from 'react-native';
 
-import {
-  Header,
-  LearnMoreLinks,
-  Colors,
-  DebugInstructions,
-  ReloadInstructions,
-} from 'react-native/Libraries/NewAppScreen';
-
 const App: () => React$Node = () => {
+  const [isLoading, setLoading] = useState(false);
+  const [data, setData] = useState([]);
+
+  const getQuote = () => {
+    setLoading(true);
+
+    console.log('page load');
+
+    fetch('http://192.168.100.5:3000/api/quote')
+      .then(res => res.json())
+      .then(json => setData(json.quote))
+      .catch(error => console.error(error))
+      .finally(() => setLoading(false));
+  };
+
+  useEffect(() => {
+    getQuote();
+  }, []);
+
   return (
     <>
-      <StatusBar barStyle="dark-content" />
-      <SafeAreaView>
-        <ScrollView
-          contentInsetAdjustmentBehavior="automatic"
-          style={styles.scrollView}>
-          <Header />
-          {global.HermesInternal == null ? null : (
-            <View style={styles.engine}>
-              <Text style={styles.footer}>Engine: Hermes</Text>
-            </View>
-          )}
-          <View style={styles.body}>
-            <View style={styles.sectionContainer}>
-              <Text style={styles.sectionTitle}>Step One</Text>
-              <Text style={styles.sectionDescription}>
-                Edit <Text style={styles.highlight}>App.js</Text> to change this
-                screen and then come back to see your edits.
-              </Text>
-            </View>
-            <View style={styles.sectionContainer}>
-              <Text style={styles.sectionTitle}>See Your Changes</Text>
-              <Text style={styles.sectionDescription}>
-                <ReloadInstructions />
-              </Text>
-            </View>
-            <View style={styles.sectionContainer}>
-              <Text style={styles.sectionTitle}>Debug</Text>
-              <Text style={styles.sectionDescription}>
-                <DebugInstructions />
-              </Text>
-            </View>
-            <View style={styles.sectionContainer}>
-              <Text style={styles.sectionTitle}>Learn More</Text>
-              <Text style={styles.sectionDescription}>
-                Read the docs to discover what to do next:
-              </Text>
-            </View>
-            <LearnMoreLinks />
-          </View>
-        </ScrollView>
+      <StatusBar
+        translucent
+        backgroundColor="transparent"
+        barStyle="dark-content"
+      />
+      <SafeAreaView style={styles.container}>
+        {isLoading ? (
+          <ActivityIndicator size="large" color="blue" />
+        ) : (
+          <TouchableOpacity onPress={getQuote} style={styles.touchScreen}>
+            <Text style={styles.quote}>{data.quote}</Text>
+            <Text style={styles.author}>"{data.author}"</Text>
+          </TouchableOpacity>
+        )}
       </SafeAreaView>
     </>
   );
 };
 
 const styles = StyleSheet.create({
-  scrollView: {
-    backgroundColor: Colors.lighter,
+  container: {
+    flex: 1,
+    backgroundColor: 'orange',
+    justifyContent: 'center',
+    padding: 11,
   },
-  engine: {
-    position: 'absolute',
-    right: 0,
+  touchScreen: {
+    flex: 1,
+    justifyContent: 'center',
   },
-  body: {
-    backgroundColor: Colors.white,
+  quote: {
+    fontWeight: 'bold',
+    fontSize: 28,
+    textAlign: 'center',
   },
-  sectionContainer: {
-    marginTop: 32,
-    paddingHorizontal: 24,
-  },
-  sectionTitle: {
-    fontSize: 24,
-    fontWeight: '600',
-    color: Colors.black,
-  },
-  sectionDescription: {
-    marginTop: 8,
-    fontSize: 18,
-    fontWeight: '400',
-    color: Colors.dark,
-  },
-  highlight: {
-    fontWeight: '700',
-  },
-  footer: {
-    color: Colors.dark,
-    fontSize: 12,
-    fontWeight: '600',
-    padding: 4,
-    paddingRight: 12,
-    textAlign: 'right',
+  author: {
+    paddingTop: 21,
+    fontSize: 16,
+    color: 'grey',
+    textAlign: 'center',
   },
 });
 
